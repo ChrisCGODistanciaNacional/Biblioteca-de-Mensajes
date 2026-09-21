@@ -26,8 +26,15 @@
         #toast { position: fixed; bottom: 30px; right: 30px; background-color: #323232; color: #fff; padding: 12px 24px; border-radius: var(--radius-md); z-index: 10000; display: none; opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); font-size: 14px; display: flex; align-items: center; gap: 8px; }
         #toast.show { display: flex; opacity: 1; transform: translateY(0); }
 
+        /* AVISO DE ACTUALIZACIÓN DISPONIBLE */
+        #updateBanner { display: none; background-color: #f5a623; color: #3a2a00; padding: 10px 20px; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; font-size: 13px; font-weight: 700; text-align: center; }
+        #updateBanner button { background-color: #3a2a00; color: #fff; border: none; padding: 8px 16px; border-radius: 20px; font-weight: 700; font-size: 13px; cursor: pointer; }
+        #updateBanner button:hover { background-color: #55400a; }
+
         /* HEADER */
-        .header { background-color: var(--primary-dark); color: white; padding: 12px 20px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header { background-color: var(--primary-dark); color: white; padding: 10px 20px; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .header-row-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+        .header-row-bottom { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
         .header-title { font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .header-controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         
@@ -120,37 +127,47 @@
 </head>
 <body>
 
+    <!-- AVISO DE ACTUALIZACIÓN DISPONIBLE (aparece si este navegador tenía datos de una versión anterior del archivo) -->
+    <div id="updateBanner">
+        <span>🔄 Hay una nueva versión de esta biblioteca. Lo que ves puede estar desactualizado.</span>
+        <button onclick="applyUpdate()">Actualizar ahora</button>
+    </div>
+
     <!-- NOTIFICACIÓN TOAST AUTOMÁTICA -->
     <div id="toast">📋 ¡Mensaje copiado con éxito!</div>
 
     <header class="header">
-        <div class="header-title">
-            🟢 Biblioteca de Mensajes <span id="headerCount" style="font-size:12px; font-weight:500; opacity:0.85; margin-left:4px;"></span>
+        <div class="header-row-top">
+            <div class="header-title">
+                🟢 Biblioteca de Mensajes <span id="headerCount" style="font-size:12px; font-weight:500; opacity:0.85; margin-left:4px;"></span>
+            </div>
+            <div class="header-controls">
+                <button class="btn btn-light" onclick="openConfig()">⚙️ Configuración y Variables</button>
+                <button class="btn btn-primary" onclick="openMsgModal()">+ Nuevo Mensaje</button>
+            </div>
         </div>
-        <div class="select-group">
-            <select id="selAsesor" onchange="renderMessages()"></select>
-            <select id="selCarrera" onchange="renderMessages()"></select>
-            
-            <!-- NUEVO DROPDOWN SOLICITADO: DESCUENTO MATRÍCULA -->
-            <select id="selDescMatricula" onchange="renderMessages()">
-                <option value="0">Matrícula Sin Dto. (0%)</option>
-                <option value="30">Matrícula con 30% Dto.</option>
-                <option value="40">Matrícula con 40% Dto.</option>
-                <option value="50">Matrícula con 50% Dto.</option>
-                <option value="75" selected="">Matrícula con 75% Dto.</option>
-                <option value="100">Matrícula con 100% Dto.</option>
-            </select>
+        <div class="header-row-bottom">
+            <div class="select-group">
+                <select id="selAsesor" onchange="renderMessages()"></select>
+                <select id="selCarrera" onchange="renderMessages()"></select>
 
-            <select id="selConvenio" onchange="renderMessages()">
-                <option value="NINGUNO">Sin Convenio</option>
-                <option value="SILVER">Convenio: Silver</option>
-                <option value="GOLDEN">Convenio: Golden</option>
-                <option value="PNP">Convenio: PNP</option>
-            </select>
-        </div>
-        <div class="header-controls">
-            <button class="btn btn-light" onclick="openConfig()">⚙️ Configuración y Variables</button>
-            <button class="btn btn-primary" onclick="openMsgModal()">+ Nuevo Mensaje</button>
+                <!-- NUEVO DROPDOWN SOLICITADO: DESCUENTO MATRÍCULA -->
+                <select id="selDescMatricula" onchange="renderMessages()">
+                    <option value="0">Matrícula Sin Dto. (0%)</option>
+                    <option value="30">Matrícula con 30% Dto.</option>
+                    <option value="40">Matrícula con 40% Dto.</option>
+                    <option value="50">Matrícula con 50% Dto.</option>
+                    <option value="75" selected="">Matrícula con 75% Dto.</option>
+                    <option value="100">Matrícula con 100% Dto.</option>
+                </select>
+
+                <select id="selConvenio" onchange="renderMessages()">
+                    <option value="NINGUNO">Sin Convenio</option>
+                    <option value="SILVER">Convenio: Silver</option>
+                    <option value="GOLDEN">Convenio: Golden</option>
+                    <option value="PNP">Convenio: PNP</option>
+                </select>
+            </div>
         </div>
     </header>
 
@@ -1966,6 +1983,10 @@
 };
         /*==DEFAULT_DATA_END==*/
 
+        /*==DATA_VERSION_START==*/
+        const DATA_VERSION = "2026-09-21T12-00-00";
+        /*==DATA_VERSION_END==*/
+
         let appData = {};
         let activeCategory = 'cat_1783437515420';
 
@@ -1981,8 +2002,24 @@
         function loadData() {
             try {
                 const stored = localStorage.getItem('biblioteca_cgo_v3');
-                if (stored) appData = JSON.parse(stored);
-                else appData = JSON.parse(JSON.stringify(defaultData));
+                const storedVersion = localStorage.getItem('biblioteca_cgo_v3_version');
+
+                if (!stored) {
+                    // Primera vez que se abre este archivo en este navegador: usa los datos de fábrica.
+                    appData = JSON.parse(JSON.stringify(defaultData));
+                    localStorage.setItem('biblioteca_cgo_v3', JSON.stringify(appData));
+                    localStorage.setItem('biblioteca_cgo_v3_version', DATA_VERSION);
+                } else if (storedVersion === DATA_VERSION) {
+                    // Ya tiene guardada la misma versión de este archivo: usa lo guardado tal cual.
+                    appData = JSON.parse(stored);
+                } else {
+                    // Tiene datos guardados de una versión ANTERIOR del archivo (o de antes de
+                    // que existiera este control de versión): sigue mostrando lo que tenía
+                    // guardado, pero avisa que hay una versión más reciente disponible.
+                    appData = JSON.parse(stored);
+                    const banner = document.getElementById('updateBanner');
+                    if (banner) banner.style.display = 'flex';
+                }
             } catch (e) {
                 appData = JSON.parse(JSON.stringify(defaultData));
             }
@@ -1991,10 +2028,21 @@
         function saveData() {
             try {
                 localStorage.setItem('biblioteca_cgo_v3', JSON.stringify(appData));
+                localStorage.setItem('biblioteca_cgo_v3_version', DATA_VERSION);
             } catch (e) {
                 triggerToast();
                 document.getElementById('toast').innerText = "⚠️ Error: Memoria saturada.";
             }
+        }
+
+        // Fuerza la actualización a la versión más reciente incluida en este archivo,
+        // descartando lo que este navegador tenía guardado localmente.
+        function applyUpdate() {
+            try {
+                localStorage.setItem('biblioteca_cgo_v3', JSON.stringify(defaultData));
+                localStorage.setItem('biblioteca_cgo_v3_version', DATA_VERSION);
+            } catch (e) {}
+            location.reload();
         }
 
         // --- 3. MOTOR DE CÁLCULOS EXCLUSIVOS DE LOS 4 ESCENARIOS ---
@@ -2446,6 +2494,8 @@
                 setProp('#msgContent', 'value', '');
                 setProp('#msgImageBase64', 'value', '');
                 docClone.querySelectorAll('.modal-overlay').forEach(o => { o.style.display = 'none'; });
+                const bannerEl = docClone.querySelector('#updateBanner');
+                if (bannerEl) bannerEl.style.display = 'none';
 
                 // Inyecta los datos ACTUALES como nuevos valores de fábrica (defaultData)
                 const scriptEl = docClone.querySelector('#appScript');
@@ -2454,6 +2504,15 @@
                 scriptSrc = scriptSrc.replace(
                     /\/\*==DEFAULT_DATA_START==\*\/[\s\S]*?\/\*==DEFAULT_DATA_END==\*\//,
                     "/*==DEFAULT_DATA_START==*/\n        const defaultData = " + newDataJson + ";\n        /*==DEFAULT_DATA_END==*/"
+                );
+
+                // Marca esta exportación con una versión NUEVA y única: así, cualquier
+                // navegador que tenga guardada una versión anterior detectará el cambio
+                // apenas abra este archivo y mostrará el aviso de actualización.
+                const newVersion = new Date().toISOString();
+                scriptSrc = scriptSrc.replace(
+                    /\/\*==DATA_VERSION_START==\*\/[\s\S]*?\/\*==DATA_VERSION_END==\*\//,
+                    "/*==DATA_VERSION_START==*/\n        const DATA_VERSION = \"" + newVersion + "\";\n        /*==DATA_VERSION_END==*/"
                 );
                 scriptEl.textContent = scriptSrc;
 
