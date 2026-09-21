@@ -632,7 +632,7 @@
     <div class="modal-overlay" id="modalMsg" style="display: none;">
         <div class="modal" style="max-width: 650px;">
             <div class="modal-header">
-                <h3 id="msgModalTitle">✨ Crear Nueva Plantilla</h3>
+                <h3 id="msgModalTitle">✏️ Actualizar Plantilla</h3>
                 <button class="modal-close" onclick="closeModal('modalMsg')">✖</button>
             </div>
             <div class="modal-body">
@@ -654,13 +654,13 @@
                 </div>
                 
                 <!-- Input de Texto -->
-                <div class="form-group" id="textAreaContainer" style="display: none;">
+                <div class="form-group" id="textAreaContainer" style="display: block;">
                     <label>Cuerpo del Script publicitario</label>
                     <textarea id="msgContent" rows="9" placeholder="Escribe tu mensaje usando las etiquetas de inversión..."></textarea>
                 </div>
 
                 <!-- Input de Imagen -->
-                <div class="form-group" id="imageAreaContainer" style="display: block;">
+                <div class="form-group" id="imageAreaContainer" style="display: none;">
                     <label>Seleccionar Archivo Gráfico</label>
                     <input type="file" id="msgImage" accept="image/*">
                     <input type="hidden" id="msgImageBase64" value="">
@@ -1141,14 +1141,14 @@
             "catId": "cat_1781645573041",
             "tipo": "texto",
             "titulo": "Saludo (CONOCES la CARRERA)",
-            "contenido": "Continuaré con tu atención,\n*¡Hola! Soy [Asesor]*\n*de la #UContinental 💜*\n\n*😄💬 Coméntame:*\n*📌 ¿Deseas iniciar desde Cero o por Convalidación?*\n\n> HOY 50% Admisión, 100% Matrícula y Beneficio en Cuotas!\n* *Si deseas puedo LLAMARTE para atenderte mejor.*"
+            "contenido": "Continuaré con tu atención,\n*¡Hola! Soy [Asesor]*\n*de la #UContinental 💜*\n\n*😄💬 Coméntame:*\n*📌 ¿Deseas iniciar desde Cero o por Convalidación?*\n\n* *Si deseas puedo LLAMARTE para atenderte mejor.*"
         },
         {
             "id": "m_1781890169559",
             "catId": "cat_1781645573041",
             "tipo": "texto",
             "titulo": "Saludo (NO CONOCES la CARRERA)",
-            "contenido": "Continuaré con tu atención,\n*¡Hola! Soy [Asesor]*\n*de la #UContinental 💜*\n\nNo me figura tu carrera,\n*😄💬 Coméntame:*\n*📌 ¿Qué carrera te interesa?*\n\n> HOY 50% Admisión, 100% Matrícula y Beneficio en Cuotas!\n* Si deseas puedo LLAMARTE para atenderte mejor."
+            "contenido": "Continuaré con tu atención,\n*¡Hola! Soy [Asesor]*\n*de la #UContinental 💜*\n\nNo me figura tu carrera,\n*😄💬 Coméntame:*\n*📌 ¿Qué carrera te interesa?*\n\n* Si deseas puedo LLAMARTE para atenderte mejor."
         },
         {
             "id": "m_1781646764217",
@@ -2500,6 +2500,7 @@
 
         window.onload = initApp;
     </script>
+
 
 
 
