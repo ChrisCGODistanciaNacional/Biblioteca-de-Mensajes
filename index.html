@@ -128,13 +128,13 @@
 <body>
 
     <!-- AVISO DE ACTUALIZACIÓN DISPONIBLE (aparece si este navegador tenía datos de una versión anterior del archivo) -->
-    <div id="updateBanner">
+    <div id="updateBanner" style="display: none;">
         <span>🔄 Hay una nueva versión de esta biblioteca. Lo que ves puede estar desactualizado.</span>
         <button onclick="applyUpdate()">Actualizar ahora</button>
     </div>
 
     <!-- NOTIFICACIÓN TOAST AUTOMÁTICA -->
-    <div id="toast">📋 ¡Mensaje copiado con éxito!</div>
+    <div id="toast" class="">⚙️ Configuración sincronizada.</div>
 
     <header class="header">
         <div class="header-row-top">
@@ -573,6 +573,13 @@
                     <td><input type="text" id="a_url_28" value="wa.me/"></td>
                     <td><button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="removeAsesorRow(28)">Eliminar</button></td>
                 </tr>
+            
+                <tr>
+                    <td><input type="text" id="a_nom_29" value="Jean Espinoza"></td>
+                    <td><input type="text" id="a_cel_29" value="+51991567396"></td>
+                    <td><input type="text" id="a_url_29" value="wa.me/"></td>
+                    <td><button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="removeAsesorRow(29)">Eliminar</button></td>
+                </tr>
             </tbody>
                         </table>
                     </div>
@@ -995,6 +1002,12 @@
             "id": "a_1789572656222",
             "nombre": "Allison Romero",
             "celular": "+51938353285",
+            "url": "wa.me/"
+        },
+        {
+            "id": "a_1790024400941",
+            "nombre": "Jean Espinoza",
+            "celular": "+51991567396",
             "url": "wa.me/"
         }
     ],
@@ -1984,7 +1997,7 @@
         /*==DEFAULT_DATA_END==*/
 
         /*==DATA_VERSION_START==*/
-        const DATA_VERSION = "2026-09-21T12-00-00";
+        const DATA_VERSION = "2026-09-21T21:00:33.026Z";
         /*==DATA_VERSION_END==*/
 
         let appData = {};
@@ -2559,6 +2572,7 @@
 
         window.onload = initApp;
     </script>
+
 
 
 
