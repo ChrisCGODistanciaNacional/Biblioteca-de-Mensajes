@@ -43,6 +43,8 @@
         .btn-light:hover { background-color: rgba(255,255,255,0.25); }
         .btn-primary { background-color: #00a884; color: white; }
         .btn-primary:hover { background-color: #00bfa5; }
+        .btn-reset { background-color: #fff3cd; color: #7a5c00; }
+        .btn-reset:hover { background-color: #f0b429; color: #3a2a00; }
         .btn-danger { background-color: #ea0038; color: white; }
         .btn-danger:hover { background-color: #ff2a5f; }
         
@@ -134,7 +136,7 @@
     </div>
 
     <!-- NOTIFICACIÓN TOAST AUTOMÁTICA -->
-    <div id="toast" class="">⚙️ Configuración sincronizada.</div>
+    <div id="toast" class="">📄 HTML actualizado descargado. ¡Súbelo a GitHub!</div>
 
     <header class="header">
         <div class="header-row-top">
@@ -144,6 +146,7 @@
             <div class="header-controls">
                 <button class="btn btn-light" onclick="openConfig()">⚙️ Configuración y Variables</button>
                 <button class="btn btn-primary" onclick="openMsgModal()">+ Nuevo Mensaje</button>
+                <button class="btn btn-reset" onclick="confirmReset()" title="Descarta cualquier cambio hecho en este navegador (ediciones, mensajes borrados) y vuelve a la versión oficial publicada en este archivo">♻️ Restablecer Archivo</button>
             </div>
         </div>
         <div class="header-row-bottom">
@@ -643,6 +646,7 @@
                         <input type="file" id="importFile" accept=".json">
                         <button class="btn btn-danger" onclick="importData()" style="margin-top: 8px;">⚠️ Restaurar Datos Desde Archivo</button>
                     </div>
+                    <p style="margin-top:22px; font-size:11px; color:var(--text-secondary); opacity:0.7; text-align:center;">Herramienta desarrollada por Christopher Huamán — CGO 2025</p>
                 </div>
             </div>
             <div class="modal-footer">
@@ -1997,7 +2001,7 @@
         /*==DEFAULT_DATA_END==*/
 
         /*==DATA_VERSION_START==*/
-        const DATA_VERSION = "2026-09-21T21:00:33.026Z";
+        const DATA_VERSION = "2026-09-22T01:16:53.211Z";
         /*==DATA_VERSION_END==*/
 
         let appData = {};
@@ -2056,6 +2060,20 @@
                 localStorage.setItem('biblioteca_cgo_v3_version', DATA_VERSION);
             } catch (e) {}
             location.reload();
+        }
+
+        // Botón manual "♻️ Restablecer Archivo": siempre visible en el header. Sirve tanto
+        // para deshacer un borrado/edición accidental de un asesor como para forzar la
+        // verificación de una actualización reciente, ya que en ambos casos el resultado
+        // es el mismo: volver a la versión oficial que trae este archivo.
+        function confirmReset() {
+            const ok = confirm(
+                "¿Restablecer esta Biblioteca de Mensajes?\n\n" +
+                "Esto descartará cualquier cambio hecho en ESTE navegador (ediciones, mensajes borrados, etc.) " +
+                "y mostrará la versión oficial publicada en este archivo.\n\nEsta acción no se puede deshacer."
+            );
+            if (!ok) return;
+            applyUpdate();
         }
 
         // --- 3. MOTOR DE CÁLCULOS EXCLUSIVOS DE LOS 4 ESCENARIOS ---
