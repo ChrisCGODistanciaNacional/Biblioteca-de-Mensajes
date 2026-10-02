@@ -125,6 +125,50 @@
         .whatsapp-strike { text-decoration: line-through; }
         
         .variable-badge { background: #e0f2f1; color: #004d40; padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; font-weight: bold; display: inline-block; }
+
+        /* Botón "← Categorías" para volver desde el celular; oculto en PC */
+        .mobile-back-btn { display: none; align-items: center; gap: 6px; background: var(--primary-dark); color: #fff; border: none; padding: 12px 16px; font-size: 14px; font-weight: 700; cursor: pointer; width: 100%; text-align: left; border-radius: var(--radius-md); margin-bottom: 4px; }
+
+        /* ============== VISTA CELULAR / PANTALLAS CHICAS ============== */
+        @media (max-width: 820px) {
+            body { height: 100dvh; }
+
+            .header { padding: 8px 12px; gap: 6px; }
+            .header-title { font-size: 14px; gap: 6px; }
+            #headerCount { display: none; } /* ocupa espacio y no es vital en celular */
+            .header-controls { gap: 6px; width: 100%; }
+            .header-controls .btn { padding: 9px 10px; font-size: 12px; flex: 1 1 auto; justify-content: center; white-space: nowrap; }
+            .select-group { width: 100%; padding: 5px; gap: 5px; }
+            .select-group select { flex: 1 1 auto; font-size: 12px; padding: 7px 8px; min-width: 0; }
+
+            /* Un solo panel visible a la vez, a pantalla completa */
+            .main-container { position: relative; overflow: hidden; }
+            .sidebar, .content { width: 100%; max-width: 100%; }
+            .sidebar { position: absolute; inset: 0; z-index: 5; }
+            body.mobile-show-content .sidebar { display: none; }
+            body:not(.mobile-show-content) .content { display: none; }
+            body.mobile-show-content .mobile-back-btn { display: flex; }
+
+            .search-box input { font-size: 16px; padding: 10px 12px; } /* 16px evita zoom automático en iOS */
+            .cat-item { padding: 16px; font-size: 15px; } /* objetivo táctil más grande */
+
+            .content { padding: 10px; gap: 10px; }
+            .category-header h2 { font-size: 16px; }
+            .msg-grid { grid-template-columns: 1fr; gap: 12px; }
+
+            .msg-card-footer { flex-wrap: wrap; }
+            .msg-card-footer .btn { flex: 1 1 42%; font-size: 12.5px; padding: 11px 6px; }
+
+            .modal { width: 96%; max-height: 94dvh; }
+            .modal-body { padding: 12px; }
+            .modal-header h3 { font-size: 15px; }
+            .modal-footer { flex-wrap: wrap; }
+            .modal-footer .btn { flex: 1 1 auto; justify-content: center; }
+            table { font-size: 12.5px; display: block; overflow-x: auto; white-space: nowrap; }
+            .tabs { overflow-x: auto; }
+            .tab { white-space: nowrap; padding: 10px 12px; font-size: 13px; }
+            .form-group input, .form-group textarea, .form-group select { font-size: 16px; } /* evita zoom iOS */
+        }
     </style>
 </head>
 <body>
@@ -136,7 +180,7 @@
     </div>
 
     <!-- NOTIFICACIÓN TOAST AUTOMÁTICA -->
-    <div id="toast" class="">🖼️ ¡Imagen copiada! Ya puedes pegarla (Ctrl+V) en WhatsApp.</div>
+    <div id="toast" class="">⚙️ Configuración sincronizada.</div>
 
     <header class="header">
         <div class="header-row-top">
@@ -186,6 +230,7 @@
         </aside>
 
         <main class="content">
+            <button class="mobile-back-btn" onclick="showCategoriesMobile()">← Categorías</button>
             <div class="category-header">
                 <h2 id="currentCategoryTitle">📌 Cargando...</h2>
             </div>
@@ -474,7 +519,7 @@
             
                 <tr>
                     <td><input type="text" id="a_nom_14" value="Jimena Vera"></td>
-                    <td><input type="text" id="a_cel_14" value="+51942379090"></td>
+                    <td><input type="text" id="a_cel_14" value="+51923179377"></td>
                     <td><input type="text" id="a_url_14" value="https://bit.ly/JVAsesoriaUC"></td>
                     <td><button class="btn btn-danger" style="padding:4px 8px; font-size:11px;" onclick="removeAsesorRow(14)">Eliminar</button></td>
                 </tr>
@@ -921,7 +966,7 @@
         {
             "id": "a_1782143447492",
             "nombre": "Jimena Vera",
-            "celular": "+51942379090",
+            "celular": "+51923179377",
             "url": "https://bit.ly/JVAsesoriaUC"
         },
         {
@@ -1336,7 +1381,7 @@
             "catId": "cat_1781645740752",
             "tipo": "texto",
             "titulo": "EXCEL (ADJUNTAR Gráfica)",
-            "contenido": "✨ *¡BECA de EXCEL!*\nTendrás incluido un Curso de Excel Certificado para complementar tus estudios luego del pago de Matrícula y Cuota.\n> Cupos Limitados."
+            "contenido": "✨ *¡BECA de EXCEL!*\nTendrás incluido un Curso de Excel Certificado para complementar tus estudios luego del pago de Matrícula y Cuota.\n\n> Aplica hasta estas últimas fechas."
         },
         {
             "id": "m_1790786030270",
@@ -1735,7 +1780,7 @@
             "catId": "cat_1781646206117",
             "tipo": "texto",
             "titulo": "WAPI - NEW LEAD POR HORA",
-            "contenido": "*Universidad Continental* 💜\n\n🎓Vimos tu interés en estudiar\n📚 te ayudaré por este medio,\n\nHOY aún puedes acceder a\nbeneficios exclusivos!!\n> _✨ 50% Admisión, 100% Matrícula y Beneficio en Cuotas!!_\n\n💬 *COMÉNTAME:*\n1️⃣ Sí, quiero inscribirme\n2️⃣ Necesito más info"
+            "contenido": "*Universidad Continental* 💜\n\nAccede a Distancia 100% Virtual! con nuestro modelo Adaptativo!\n\n*🎓Vimos tu interés en estudiar*\n*📚 te ayudaré por este medio,*\n\nHOY aún puedes acceder a\nbeneficios exclusivos!!\n> _✨ 50% Admisión, 100% Matrícula y Beneficio en Cuotas!!_\n\n💬 *COMÉNTAME:*\n1️⃣ Sí, quiero inscribirme\n2️⃣ Tengo consultas"
         },
         {
             "id": "m_1790012737176",
@@ -2022,7 +2067,7 @@
         /*==DEFAULT_DATA_END==*/
 
         /*==DATA_VERSION_START==*/
-        const DATA_VERSION = "2026-09-30T16:41:45.978Z";
+        const DATA_VERSION = "2026-10-02T00:24:32.473Z";
         /*==DATA_VERSION_END==*/
 
         let appData = {};
@@ -2203,6 +2248,8 @@
         }
 
         // --- 4. RENDER DE INTERFAZ ---
+        let appInitialized = false;
+
         function initApp() {
             loadData();
             populateSelects();
@@ -2211,6 +2258,7 @@
                 activeCategory = appData.categorias[0].id;
             }
             selectCategory(activeCategory);
+            appInitialized = true;
         }
 
         function populateSelects() {
@@ -2244,6 +2292,19 @@
             document.getElementById('currentCategoryTitle').innerText = cat ? cat.nombre : 'Categoría No Seleccionada';
             renderSidebar();
             renderMessages();
+            // En celular, al elegir una categoría pasamos a ver sus mensajes a pantalla
+            // completa (en PC esto no tiene efecto visual, ambos paneles ya se ven juntos).
+            // Se excluye la selección automática de la primera categoría al cargar la
+            // página, para que en celular siempre arranque mostrando la lista completa.
+            if (appInitialized) {
+                document.body.classList.add('mobile-show-content');
+                document.querySelector('.content').scrollTop = 0;
+            }
+        }
+
+        // Vuelve a mostrar la lista de categorías a pantalla completa en celular.
+        function showCategoriesMobile() {
+            document.body.classList.remove('mobile-show-content');
         }
 
         function renderMessages() {
@@ -2373,7 +2434,13 @@
             }
         }
 
-        function filterMessages() { renderMessages(); }
+        function filterMessages() {
+            renderMessages();
+            // En celular, si ya se escribió algo en el buscador, mostramos los resultados
+            // a pantalla completa (igual que al elegir una categoría).
+            const term = document.getElementById('searchInput').value;
+            if (term) document.body.classList.add('mobile-show-content');
+        }
 
         function promptNewCategory() {
             const name = prompt("Nombre identificador de la nueva categoría:");
@@ -2579,6 +2646,11 @@
                 docClone.querySelectorAll('.modal-overlay').forEach(o => { o.style.display = 'none'; });
                 const bannerEl = docClone.querySelector('#updateBanner');
                 if (bannerEl) bannerEl.style.display = 'none';
+                // Si el administrador estaba viendo una categoría en su celular al exportar,
+                // no queremos que el archivo descargado arranque ya "adentro" de esa vista
+                // para quien lo abra después: siempre debe iniciar mostrando categorías.
+                const bodyClone = docClone.querySelector('body');
+                if (bodyClone) bodyClone.classList.remove('mobile-show-content');
 
                 // Inyecta los datos ACTUALES como nuevos valores de fábrica (defaultData)
                 const scriptEl = docClone.querySelector('#appScript');
@@ -2642,6 +2714,7 @@
 
         window.onload = initApp;
     </script>
+
 
 
 
