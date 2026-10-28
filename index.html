@@ -447,7 +447,7 @@
       <div class="form-group"><label for="msgCategory">Categoría</label><select id="msgCategory"></select></div>
       <div class="form-group"><label for="msgType">Tipo</label><select id="msgType" onchange="toggleMsgType()"><option value="texto">Texto (con variables y formato de WhatsApp)</option><option value="imagen">Imagen o flyer</option></select></div>
       <div class="form-group" id="textAreaContainer"><label for="msgContent">Mensaje</label><textarea id="msgContent" placeholder="Escribe el mensaje. Usa *negrita*, _cursiva_, ~tachado~, líneas con &quot;* &quot; para viñetas y &quot;&gt; &quot; para citas. Variables como [Asesor] o [cuota1Y_desc] se reemplazan solas."></textarea><div class="form-help">Se ve igual que en WhatsApp. Las variables están en ⚙️ → Variables.</div></div>
-      <div class="form-group" id="imageAreaContainer" style="display:none;"><label for="msgImage">Imagen (se reduce a 750 px de ancho)</label><input type="file" id="msgImage" accept="image/*"><input type="hidden" id="msgImageBase64" value=""></div>
+      <div class="form-group" id="imageAreaContainer" style="display:none;"><label for="msgImage">Imagen (hasta 2000 px de ancho; las gráficas en PNG se guardan nítidas)</label><input type="file" id="msgImage" accept="image/*"><input type="hidden" id="msgImageBase64" value=""></div>
     </div>
     <div class="modal-footer"><button class="btn-ghost" onclick="closeModal('modalMsg')">Cancelar</button><button class="btn-primary" onclick="saveMessage()">Guardar mensaje</button></div>
   </div>
@@ -1137,10 +1137,16 @@ document.getElementById('msgImage').addEventListener('change', function (e) {
   reader.onload = function (evt) {
     const img = new Image();
     img.onload = function () {
-      const MAX_WIDTH = 750; const scale = Math.min(1, MAX_WIDTH / img.width);
+      // 28/10/2026: hasta 2000 px de ancho (antes 750) para que las gráficas con texto se lean al ampliar;
+      // PNG si la imagen subida es PNG (letras nítidas); JPG al 90 % para fotos/flyers o si el PNG queda muy pesado
+      const MAX_WIDTH = 2000; const scale = Math.min(1, MAX_WIDTH / img.width);
       const canvas = document.createElement('canvas'); canvas.width = Math.round(img.width * scale); canvas.height = Math.round(img.height * scale);
-      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-      document.getElementById('msgImageBase64').value = canvas.toDataURL('image/jpeg', 0.65);
+      const ctx2 = canvas.getContext('2d'); ctx2.imageSmoothingEnabled = true; ctx2.imageSmoothingQuality = 'high';
+      if (file.type !== 'image/png') { ctx2.fillStyle = '#ffffff'; ctx2.fillRect(0, 0, canvas.width, canvas.height); }
+      ctx2.drawImage(img, 0, 0, canvas.width, canvas.height);
+      let uri = file.type === 'image/png' ? canvas.toDataURL('image/png') : '';
+      if (!uri || uri.length > 1600000) uri = canvas.toDataURL('image/jpeg', 0.9);
+      document.getElementById('msgImageBase64').value = uri;
     };
     img.src = evt.target.result;
   };
