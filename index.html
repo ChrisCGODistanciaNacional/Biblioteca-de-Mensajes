@@ -459,7 +459,7 @@ const defaultData = {"carreras":[{"id":"c1","nombre":"Administración","cred":20
 /*==DEFAULT_DATA_END==*/
 
 /*==DATA_VERSION_START==*/
-const DATA_VERSION = "2026-11-02T12:34:43.000Z";
+const DATA_VERSION = "2026-11-02T12:39:27.000Z";
 /*==DATA_VERSION_END==*/
 
 // ===================== ESTADO =====================
@@ -588,50 +588,75 @@ function applyContextDefaults() {
   ctx.version = DATA_VERSION;
   saveCtx();
 }
+// ===================== ALMACENAMIENTO =====================
+// La biblioteca ya pesa varios MB (imágenes en alta), más de lo que entra en localStorage (~5 MB).
+// Por eso:
+//  · Los asesores siempre trabajan con la versión publicada que trae este archivo (no se copia al navegador).
+//  · Solo si el supervisor edita, su copia se guarda en IndexedDB (sin ese límite), junto con la versión
+//    publicada sobre la que trabajó. Si se publica otra versión, aparece el aviso y «Actualizar versión»
+//    descarta esa copia y carga la nueva.
+const IDB_NAME = 'biblioteca_cgo', IDB_STORE = 'kv';
+const EDIT_FLAG = STORAGE_KEY + '_editado';   // versión publicada sobre la que se editó (si hay edición local)
+function idbAbrir() {
+  return new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('sin IndexedDB'));
+    const rq = indexedDB.open(IDB_NAME, 1);
+    rq.onupgradeneeded = () => { try { rq.result.createObjectStore(IDB_STORE); } catch (e) {} };
+    rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+  });
+}
+async function idbGet(k) { const db = await idbAbrir(); return new Promise((res, rej) => { const rq = db.transaction(IDB_STORE).objectStore(IDB_STORE).get(k); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); }); }
+async function idbSet(k, v) { const db = await idbAbrir(); return new Promise((res, rej) => { const tx = db.transaction(IDB_STORE, 'readwrite'); tx.objectStore(IDB_STORE).put(v, k); tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); }); }
+async function idbDel(k) { try { const db = await idbAbrir(); await new Promise(res => { const tx = db.transaction(IDB_STORE, 'readwrite'); tx.objectStore(IDB_STORE).delete(k); tx.oncomplete = res; tx.onerror = res; }); } catch (e) {} }
+function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function descartarCopiaLocal() { lsDel(EDIT_FLAG); idbDel('data'); }
+
 function loadData() {
-  // Si el asesor pulsó "Actualizar ahora" desde una pestaña vieja, la versión nueva se aplica sola.
+  // Si el asesor pulsó "Actualizar versión", la versión nueva se aplica sola y se descarta la copia anterior.
   try {
     if (sessionStorage.getItem('biblio_auto_update') === '1') {
       sessionStorage.removeItem('biblio_auto_update');
-      if (localStorage.getItem(STORAGE_KEY + '_version') !== DATA_VERSION) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
-        localStorage.setItem(STORAGE_KEY + '_version', DATA_VERSION);
-      }
+      if (lsGet(EDIT_FLAG) !== DATA_VERSION) descartarCopiaLocal();
     }
     if (/[?&]v=\d+/.test(location.search)) history.replaceState(null, '', location.pathname + location.hash);
   } catch (e) {}
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    const storedVersion = localStorage.getItem(STORAGE_KEY + '_version');
-    if (!stored) {
-      appData = ensureShape(JSON.parse(JSON.stringify(defaultData)));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-      localStorage.setItem(STORAGE_KEY + '_version', DATA_VERSION);
-    } else {
-      appData = ensureShape(JSON.parse(stored));
-      if (storedVersion !== DATA_VERSION) {
-        // Este navegador guardó una versión anterior: se sigue mostrando lo guardado,
-        // con el aviso de que hay una versión más reciente.
-        mostrarAvisoVersion();
-      }
-    }
-  } catch (e) {
-    appData = ensureShape(JSON.parse(JSON.stringify(defaultData)));
+  // Copia antigua en localStorage (formato anterior): si es de esta misma versión y se estaba editando,
+  // pasa a IndexedDB; si es de una versión anterior, la nueva publicada la reemplaza. En ambos casos se libera.
+  const viejo = lsGet(STORAGE_KEY);
+  if (viejo !== null) {
+    const vv = lsGet(STORAGE_KEY + '_version');
+    if (vv === DATA_VERSION && editMode) { try { idbSet('data', JSON.parse(viejo)).then(() => lsSet(EDIT_FLAG, DATA_VERSION)).catch(() => {}); } catch (e) {} }
+    lsDel(STORAGE_KEY);
   }
+  lsSet(STORAGE_KEY + '_version', DATA_VERSION);
+  appData = ensureShape(JSON.parse(JSON.stringify(defaultData)));
 }
-function saveData() {
+// Si el supervisor tiene cambios guardados en este navegador, se cargan después de pintar la versión publicada.
+async function cargarCopiaLocal() {
+  const base = lsGet(EDIT_FLAG);
+  if (!base) return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
-    localStorage.setItem(STORAGE_KEY + '_version', DATA_VERSION);
-  } catch (e) {
-    toast('No se pudo guardar en este navegador (memoria llena).');
-  }
+    const d = await idbGet('data');
+    if (!d) { lsDel(EDIT_FLAG); return; }
+    appData = ensureShape(d);
+    if (appInitialized) { populateSelects(); renderContext(); renderSidebar(); renderMessages(); }
+    if (base !== DATA_VERSION) mostrarAvisoVersion();   // editó sobre una versión anterior a la publicada
+  } catch (e) {}
+}
+let guardarT = null;
+function saveData() {
+  // Solo se llama al editar (supervisor). Se guarda en IndexedDB con una pequeña espera para agrupar cambios.
+  if (!lsGet(EDIT_FLAG)) lsSet(EDIT_FLAG, DATA_VERSION);
+  clearTimeout(guardarT);
+  guardarT = setTimeout(() => {
+    idbSet('data', JSON.parse(JSON.stringify(appData))).catch(() => toast('No se pudo guardar en este navegador. Exporta el HTML para no perder tus cambios.'));
+  }, 300);
 }
 function applyUpdate() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultData));
-    localStorage.setItem(STORAGE_KEY + '_version', DATA_VERSION);
-  } catch (e) {}
+  descartarCopiaLocal();
+  lsSet(STORAGE_KEY + '_version', DATA_VERSION);
   // Se vuelven a aplicar los descuentos de la versión publicada; el nombre y la carrera se mantienen.
   ctx.version = ''; saveCtx();
   location.reload();
@@ -1339,7 +1364,8 @@ function importData() {
       const parsed = JSON.parse(e.target.result);
       if (parsed && parsed.mensajes && parsed.categorias) {
         appData = ensureShape(parsed);
-        saveData(); closeModal('modalConfig'); initApp(); toast('Datos restaurados.');
+        lsSet(EDIT_FLAG, DATA_VERSION); clearTimeout(guardarT);
+        idbSet('data', JSON.parse(JSON.stringify(appData))).catch(() => {}).then(() => { closeModal('modalConfig'); initApp(); toast('Datos restaurados.'); });
       } else { toast('Ese archivo no es un respaldo de esta biblioteca.'); }
     } catch (err) { toast('No se pudo leer el archivo de respaldo.'); }
   };
@@ -1441,6 +1467,7 @@ function initApp() {
   renderSidebar();
   renderMessages();
   appInitialized = true;
+  cargarCopiaLocal();
 }
 initApp();
 
